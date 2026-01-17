@@ -1,3 +1,4 @@
+// main.js
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import 'loaders.css/loaders.min.css';
@@ -27,14 +28,15 @@ function onSearch(event) {
   const query = input.value.trim();
 
   if (query === '') {
-    iziToast.error({
-      message: 'Please enter a search query!',
-    });
+    iziToast.error({ message: 'Please enter a search query!' });
     return;
   }
 
   form.reset();
   clearGallery();
+
+  const MIN_LOADER_TIME = 500; // мс
+  const start = Date.now();
   showLoader();
 
   getImagesByQuery(query)
@@ -45,9 +47,10 @@ function onSearch(event) {
           message:
             'Sorry, there are no images matching your search query. Please try again!',
         });
+        // додатково сховаємо лоадер перед поверненням
+        hideLoader();
         return;
       }
-
       createGallery(hits);
     })
     .catch(error => {
@@ -57,6 +60,8 @@ function onSearch(event) {
       });
     })
     .finally(() => {
-      hideLoader();
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, MIN_LOADER_TIME - elapsed);
+      setTimeout(() => hideLoader(), wait);
     });
 }
